@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        h1 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            color: azure;
+        }
+
+        body {
+            margin: 50px;
+        }
+    </style>
+</head>
+<body bgcolor="grey">
+    <h1>WEBCAM FEED</h1>
+    <div id="container">
+        <video autoplay="true" id="videoElement"></video>
+    </div>
+    <button id="toggleButton">Access Webcam</button>
+    <button id="databaseButton">Access Database</button>
+
+    <script>
+        let video = document.querySelector("#videoElement");
+        let toggleButton = document.querySelector("#toggleButton");
+        let databaseButton = document.querySelector("#databaseButton");
+        let stream = null;
+
+        toggleButton.addEventListener("click", function() {
+            if (stream) {
+                video.srcObject = null;
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            } else {
+                if (navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(function(stream) {
+                            video.srcObject = stream;
+                            stream = stream; // Save the stream for later use
+                        })
+                        .catch(function(error) {
+                            console.log("Something went wrong!");
+                        });
+                } else {
+                    console.log("getUserMedia not supported!");
+                }
+            }
+        });
+
+        databaseButton.addEventListener("click", function() {
+            // Simulate accessing the database (replace with actual database access code)
+            console.log("Accessing the database...");
+        });
+    </script>
+</body>
+</html>

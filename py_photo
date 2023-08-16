@@ -1,35 +1,34 @@
-# For reading video feeds.
+# For reading images.
 import cv2
 from ultralytics import YOLO
-# from sort.sort import *
-# from util import *
+
 import os
 
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
-cap = cv2.VideoCapture('testing/test_video.mp4')
-# cap = 'testing/plate01_test.jpg'
+# cap = cv2.VideoCapture(0)
+cap = 'testing/plate01_test.jpg'
 
-counter = 0
+
 
 output_dir = 'output_license'
 os.makedirs(output_dir, exist_ok=True)
 
-while cap.isOpened():
     # Read a frame from the video
-    success, frame = cap.read()
+frame = cv2.imread(cap)
 
 
-    if success:
+   
        
 
         # detecting license plates
-        license_plate_detection = license_model.track(frame,persist=True)
+license_plate_detection = license_model.track(frame,persist=True)
         # print(license_plate_detection)
-        if license_plate_detection:
+if license_plate_detection:
+            counter = 0
             for  license_plate in license_plate_detection[0].boxes.data.tolist():
                 print(license_plate) 
-                x1, y1, x2, y2, score, class_id = license_plate
+                x1, y1, x2, y2, class_id, score, _ = license_plate
 
                 #license plate crop
                 plate_crop = frame[int(y1): int(y2), int(x1): int(x2)]
@@ -51,14 +50,4 @@ while cap.isOpened():
                 cv2.imshow("License plate", license_frame) #License plate
 
 
-        # Break the loop if 'q' is pressedqq
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
-    else:
-        # Break the loop if the end of the video is reached
-        break
-
-
-# Release the video capture object and close the display window
-cap.release()
 cv2.destroyAllWindows()

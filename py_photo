@@ -14,16 +14,10 @@ cap = 'testing/plate01_test.jpg'
 output_dir = 'output_license'
 os.makedirs(output_dir, exist_ok=True)
 
-    # Read a frame from the video
 frame = cv2.imread(cap)
 
-
-   
-       
-
-        # detecting license plates
 license_plate_detection = license_model.track(frame,persist=True)
-        # print(license_plate_detection)
+# print(license_plate_detection)
 if license_plate_detection:
             counter = 0
             for  license_plate in license_plate_detection[0].boxes.data.tolist():
@@ -42,12 +36,9 @@ if license_plate_detection:
                 counter = counter+1
                 output_filename = os.path.join(output_dir, f'license_threshold_{counter}.jpg')
                 cv2.imwrite(output_filename, plate_crop_thresh)
-
-                # Visualize the results on the frame
                 
                 license_frame = license_plate_detection[0].plot()
 
                 cv2.imshow("License plate", license_frame) #License plate
-
 
 cv2.destroyAllWindows()

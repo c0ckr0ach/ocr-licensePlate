@@ -1,64 +1,60 @@
 # For reading video feeds.
 import cv2
+import numpy as np
 from ultralytics import YOLO
-# from sort.sort import *
+from sort.sort import *
 # from util import *
 import os
 
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
-cap = cv2.VideoCapture('testing/test_video.mp4')
+cap = cv2.VideoCapture(0)
 # cap = 'testing/plate01_test.jpg'
 
+mot_tracker = Sort()
 counter = 0
 
 output_dir = 'output_license'
 os.makedirs(output_dir, exist_ok=True)
 
 while cap.isOpened():
-    # Read a frame from the video
     success, frame = cap.read()
-
-
     if success:
-       
-
-        # detecting license plates
         license_plate_detection = license_model.track(frame,persist=True)
         # print(license_plate_detection)
-        if license_plate_detection:
-            for  license_plate in license_plate_detection[0].boxes.data.tolist():
+        if license_plate_detection and len(license_plate_detection[0].boxes.data.tolist())> 0:
+            detections = np.array([d[:4] for d in license_plate_detection[0].boxes.data.tolist()])
+            print('detections:', detections)
+            tracked_obj = mot_tracker.update(detections) 
+            print("Tracked objects:", tracked_obj)
+
+            for  license_plate, track_id in zip(license_plate_detection[0].boxes.data.tolist(),tracked_obj):
                 print(license_plate) 
                 x1, y1, x2, y2, score, class_id = license_plate
 
-                #license plate crop
-                plate_crop = frame[int(y1): int(y2), int(x1): int(x2)]
+                # license plate crop XD
+                if track_id is not None:
+                    plate_crop = frame[int(y1): int(y2), int(x1): int(x2)]
 
             
-                # process license plate
-                plate_crop_gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
-                plate_crop_thresh = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+                    # process license plate. gotta fix this for visuals
+                    plate_crop_gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
+                    plate_crop_thresh = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
 
-                # save 
-                counter = counter+1
-                output_filename = os.path.join(output_dir, f'license_threshold_{counter}.jpg')
-                cv2.imwrite(output_filename, plate_crop_thresh)
-
-                # Visualize the results on the frame
+                    # save 
+                    counter = counter+1
+                    output_filename = os.path.join(output_dir, f'license_threshold_{track_id}.jpg')
+                    cv2.imwrite(output_filename, plate_crop_thresh)
                 
-                license_frame = license_plate_detection[0].plot()
+                    license_frame = license_plate_detection[0].plot() # adding frames
 
-                cv2.imshow("License plate", license_frame) #License plate
+                    cv2.imshow("License plate", license_frame) #License plate
 
 
-        # Break the loop if 'q' is pressedqq
-        if cv2.waitKey(1) & 0xFF == ord("q"):
+        if cv2.waitKey(1) & 0xFF == ord("q"): 
             break
     else:
-        # Break the loop if the end of the video is reached
         break
 
-
-# Release the video capture object and close the display window
 cap.release()
 cv2.destroyAllWindows()

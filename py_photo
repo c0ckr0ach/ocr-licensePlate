@@ -21,7 +21,7 @@ license_plate_detection = license_model.track(frame,persist=True)
 if license_plate_detection:
             counter = 0
             for  license_plate in license_plate_detection[0].boxes.data.tolist():
-                print(license_plate) 
+                # print(license_plate) 
                 x1, y1, x2, y2, class_id, score, _ = license_plate
 
                 #license plate crop

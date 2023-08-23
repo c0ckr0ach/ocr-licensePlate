@@ -8,7 +8,7 @@ import os
 
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
-cap = cv2.VideoCapture()
+cap = cv2.VideoCapture(0)
 # cap = 'testing/plate01_test.jpg'
 
 mot_tracker = Sort()

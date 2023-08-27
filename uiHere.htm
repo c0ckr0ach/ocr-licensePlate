@@ -1,56 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        h1 {
-            font-family: Georgia, 'Times New Roman', Times, serif;
-            color: azure;
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            background-color: rgb(217, 107, 16);
         }
 
-        body {
-            margin: 50px;
+        .image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .image-container img {
+            max-height: 80%;
+            max-width: 80%;
+        }
+
+        #container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
         }
     </style>
 </head>
-<body bgcolor="grey">
-    <h1>WEBCAM FEED</h1>
-    <div id="container">
-        <video autoplay="true" id="videoElement"></video>
+<body>
+    <div class="image-container">
+        <img src="IndianOil_Logo_Fulla.jpg" alt="Left Image">
     </div>
-    <button id="toggleButton">Access Webcam</button>
-    <button id="databaseButton">Access Database</button>
-
+    <div id="container">
+        <h1><b><u>WEBCAM FEED</u></b></h1>
+        <div id="container">
+            <video autoplay="true" id="videoElement"></video>
+            <button id="toggleButton">Access Webcam</button>
+            <button id="databaseButton">Access Database</button>
+        </div>
+    </div>
+    <div class="image-container">
+        <img src="assamoil.png" alt="Right Image">
+    </div>
     <script>
-        let video = document.querySelector("#videoElement");
-        let toggleButton = document.querySelector("#toggleButton");
+         let video = document.querySelector("#videoElement");
+        const toggleButton = document.querySelector("#toggleButton");
         let databaseButton = document.querySelector("#databaseButton");
         let stream = null;
 
         toggleButton.addEventListener("click", function() {
-            if (stream) {
-                video.srcObject = null;
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            } else {
-                if (navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(function(stream) {
-                            video.srcObject = stream;
-                            stream = stream; // Save the stream for later use
-                        })
-                        .catch(function(error) {
-                            console.log("Something went wrong!");
-                        });
-                } else {
-                    console.log("getUserMedia not supported!");
-                }
-            }
+        fetch("py_test.py", {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message); // Display response from backend
+        })
+        .catch(error => {
+            console.error("An error occurred:", error);
         });
+    });
+
+        // toggleButton.addEventListener("click", function() {
+        //     if (stream) {
+        //         video.srcObject = null;
+        //         stream.getTracks().forEach(track => track.stop());
+        //         stream = null;
+        //     } else {
+        //         if (navigator.mediaDevices.getUserMedia) {
+        //             navigator.mediaDevices.getUserMedia({ video: true })
+        //                 .then(function(stream) {
+        //                     video.srcObject = stream;
+        //                     stream = stream; // Save the stream for later use
+        //                 })
+        //                 .catch(function(error) {
+        //                     console.log("Something went wrong!");
+        //                 });
+        //         } else {
+        //             console.log("getUserMedia not supported!");
+        //         }
+        //     }
+        // });
 
         databaseButton.addEventListener("click", function() {
             // Simulate accessing the database (replace with actual database access code)
             console.log("Accessing the database...");
-        });
+        });  
     </script>
 </body>
 </html>

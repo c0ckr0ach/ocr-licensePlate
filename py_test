@@ -9,7 +9,6 @@ import os
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
 cap = cv2.VideoCapture(0)
-# cap = 'testing/plate01_test.jpg'
 
 mot_tracker = Sort()
 counter = 0
@@ -30,7 +29,7 @@ while cap.isOpened():
 
             for  license_plate, track_id in zip(license_plate_detection[0].boxes.data.tolist(),tracked_obj):
                 print(license_plate) 
-                x1, y1, x2, y2, score, class_id = license_plate
+                x1, y1, x2, y2, score, class_id, _ = license_plate
 
                 # license plate crop XD
                 if track_id is not None:
@@ -39,16 +38,33 @@ while cap.isOpened():
             
                     # process license plate. gotta fix this for visuals
                     plate_crop_gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
-                    plate_crop_thresh = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+                    plate_crop_thresh_inv = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 13)
 
-                    # save 
-                    counter = counter+1
-                    output_filename = os.path.join(output_dir, f'license_threshold_{track_id}.jpg')
-                    cv2.imwrite(output_filename, plate_crop_thresh)
-                
-                    license_frame = license_plate_detection[0].plot() # adding frames
+                    # find contours in threshold
+                    
+                    contours, hierarchy = cv2.findContours(plate_crop_thresh_inv, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                    # saving in folder output_license 
 
-                    cv2.imshow("License plate", license_frame) #License plate
+
+                    char_box =[]
+                    min_char_area = 300
+                    for contour in contours:
+                        x, y, w, h = cv2.boundingRect(contour)
+                        # print("printing contours",x, y, w, h)
+                        if w * h > min_char_area:
+                            char_box.append((x, y, w, h))
+                            cv2.rectangle(frame, (x + int(x1), y + int(y1)), (x + int(x1) + w, y + int(y1) + h), (0, 255, 0), 2)
+
+                    for char_idx, (x, y, w, h) in enumerate(char_box):
+                        char_image = plate_crop_thresh_inv[y:y+h, x:x+w]
+                        if char_image.size > 0:  # Check if the image is not empty
+                            counter = counter + 1
+                            output_filename = os.path.join(output_dir, f'char_{counter}.jpg')
+                            cv2.imwrite(output_filename, char_image)
+                    
+                        license_frame = license_plate_detection[0].plot() # adding frames
+
+                        cv2.imshow("License plate", license_frame) #License plate
 
 
         if cv2.waitKey(1) & 0xFF == ord("q"): 

@@ -7,7 +7,7 @@ import os
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
 # cap = cv2.VideoCapture(0)
-cap = 'testing/plate01_test.jpg'
+cap = 'testing/download.jpg'
 
 
 
@@ -15,6 +15,11 @@ output_dir = 'output_license'
 os.makedirs(output_dir, exist_ok=True)
 
 frame = cv2.imread(cap)
+
+desired_width = 640
+desired_height = 480
+frame_resized = cv2.resize(frame, (desired_width, desired_height))
+
 
 license_plate_detection = license_model.track(frame,persist=True)
 # print(license_plate_detection)
@@ -30,15 +35,31 @@ if license_plate_detection:
             
                 # process license plate
                 plate_crop_gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
-                plate_crop_thresh = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+                plate_crop_thresh_inv = cv2.adaptiveThreshold(plate_crop_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 13, 3)
 
-                # save 
-                counter = counter+1
-                output_filename = os.path.join(output_dir, f'license_threshold_{counter}.jpg')
-                cv2.imwrite(output_filename, plate_crop_thresh)
+                contours, hierarchy = cv2.findContours(plate_crop_thresh_inv, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                # cv2.drawContours(plate_crop_thresh_inv, contours, -1, (0,255,0), 3)
+
+                char_box =[]
+                min_char_area = 300
+                for contour in contours:
+                    x, y, w, h = cv2.boundingRect(contour)
+                    # print("printing contours",x, y, w, h)
+                    if w * h > min_char_area:
+                        char_box.append((x, y, w, h))
+                        cv2.rectangle(frame, (x + int(x1), y + int(y1)), (x + int(x1) + w, y + int(y1) + h), (0, 255, 0), 2)
+
+                for char_idx, (x, y, w, h) in enumerate(char_box):
+                    char_image = plate_crop_thresh_inv[y:y+h, x:x+w]
+                    if char_image.size > 0:  # Check if the image is not empty
+                        counter = counter + 1
+                        output_filename = os.path.join(output_dir, f'char_{counter}.jpg')
+                        cv2.imwrite(output_filename, char_image)
+
                 
                 license_frame = license_plate_detection[0].plot()
 
-                cv2.imshow("License plate", license_frame) #License plate
-
+# cv2.imshow("License plate", license_frame) #License plate
+cv2.imshow("Boxes", frame) #License plate
+cv2.waitKey(0)
 cv2.destroyAllWindows()

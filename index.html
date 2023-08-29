@@ -1,106 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Your existing meta tags and styles -->
+
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: rgb(255, 255, 255);
-            font-family: Arial, sans-serif;
-        }
-
-        .top-nav {
-            background-color: black;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-placeholder {
-            font-weight: bold;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        #container {
+        /* Add any additional styling here */
+        
+        /* Style for the image upload container */
+        .image-upload-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 80vh;
+            margin-top: 20px;
         }
 
-        video {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .custom-button {
-            background-color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 15px;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        /* Style for the image display area */
+        .image-display {
             margin-top: 15px;
-        }
-
-        .custom-button:hover {
-            background-color: #f1f1f1;
-        }
-
-        .custom-button:active {
-            background-color: grey;
         }
     </style>
 </head>
 <body>
-    <div class="top-nav">
-        <div class="nav-placeholder">Sample UI</div>
-        <div class="nav-buttons">
-            <button class="custom-button">Button 1</button>
-            <button class="custom-button">Button 2</button>
+    <!-- Your existing code for top navigation and video container -->
+
+    <div id="container">
+        <!-- Existing content -->
+        
+        <!-- Image upload container -->
+        <div class="image-upload-container">
+            <label for="imageInput" class="custom-button">Upload Image</label>
+            <input type="file" id="imageInput" style="display: none;">
+            <div class="image-display">
+                <img id="uploadedImage" style="max-width: 100%; height: auto;">
+            </div>
         </div>
     </div>
-    <div id="container">
-        <!-- <h1><u>WEBCAM FEED</u></h1> -->
-        <video autoplay="true" id="videoElement"></video>
-        <button class="custom-button" id="toggleButton">Access Webcam</button>
-        <button class="custom-button" id="databaseButton">Access Database</button>
-    </div>
+
     <script>
-        let video = document.querySelector("#videoElement");
-        const toggleButton = document.querySelector("#toggleButton");
-        let databaseButton = document.querySelector("#databaseButton");
-        let stream = null;
+        // Your existing script
+        
+        // Image upload logic
+        const imageInput = document.querySelector("#imageInput");
+        const uploadedImage = document.querySelector("#uploadedImage");
 
-        toggleButton.addEventListener("click", function() {
-            console.log('button is clicked')
-            fetch('http://127.0.0.1:5000/run_python_script', {
-                method: "POST"
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message); // Display response from backend
-            })
-            .catch(error => {
-                console.error("An error occurred:", error);
-            });
+        imageInput.addEventListener("change", function(event) {
+            const selectedImage = event.target.files[0];
+            if (selectedImage) {
+                uploadedImage.src = URL.createObjectURL(selectedImage);
+                
+                // Send the selected image to your Python code (replace with actual logic)
+                const formData = new FormData();
+                formData.append("image", selectedImage);
+                
+                fetch('http://127.0.0.1:5000/upload_image', {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message); // Display response from backend
+                })
+                .catch(error => {
+                    console.error("An error occurred:", error);
+                });
+            }
         });
-
-        databaseButton.addEventListener("click", function() {
-            // Simulate accessing the database (replace with actual database access code)
-            console.log("Accessing the database...");
-        });  
     </script>
 </body>
 </html>

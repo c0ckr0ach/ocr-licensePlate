@@ -1,15 +1,17 @@
 # For reading images.
 import cv2
 from ultralytics import YOLO
+import easyocr
+
 
 import os
 
 license_model = YOLO('models/runs/detect/train3/weights/best.pt')
 # read video
 # cap = cv2.VideoCapture(0)
-cap = 'testing/download.jpg'
+cap = 'testing/download (1).jpg'
 
-
+reader = easyocr.Reader(lang_list=['en'])
 
 output_dir = 'output_license'
 os.makedirs(output_dir, exist_ok=True)
@@ -49,16 +51,21 @@ if license_plate_detection:
                         char_box.append((x, y, w, h))
                         cv2.rectangle(frame, (x + int(x1), y + int(y1)), (x + int(x1) + w, y + int(y1) + h), (0, 255, 0), 2)
 
+
+
                 for char_idx, (x, y, w, h) in enumerate(char_box):
                     char_image = plate_crop_thresh_inv[y:y+h, x:x+w]
                     if char_image.size > 0:  # Check if the image is not empty
                         counter = counter + 1
                         output_filename = os.path.join(output_dir, f'char_{counter}.jpg')
                         cv2.imwrite(output_filename, char_image)
+                # tesseract 
+                result = reader.readtext(plate_crop_thresh_inv)
 
-                
                 license_frame = license_plate_detection[0].plot()
-
+for detection in result:
+    detected_text = detection[1]
+    print(detected_text)
 # cv2.imshow("License plate", license_frame) #License plate
 cv2.imshow("Boxes", frame) #License plate
 cv2.waitKey(0)

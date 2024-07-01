@@ -1,6 +1,9 @@
 **Real-Time License Plate Detection and Recognition**
 **Overview**
-This project implements a real-time license plate detection and recognition system using machine learning. The system uses YOLO (You Only Look Once) with a custom license plate dataset for object detection. Once the license plate is detected, OpenCV extracts each individual letter from the plate. These separate images are then sent to the EasyOCR module, which reads the characters and outputs the recognized license plate in the terminal. Additionally, a frontend UI is implemented using Flask to allow users to upload images or videos for license plate detection and recognition.
+This project implements a real-time license plate detection and recognition system using machine learning. The system uses YOLO (You Only Look Once) with a custom license
+plate dataset for object detection. Once the license plate is detected, OpenCV extracts each individual letter from the plate. These separate images are then sent to the
+EasyOCR module, which reads the characters and outputs the recognized license plate in the terminal. Additionally, a frontend UI is implemented using Flask to allow users
+to upload images or videos for license plate detection and recognition.
 
 **Features**
 Real-Time License Plate Detection: Utilizes YOLO for fast and accurate license plate detection.
